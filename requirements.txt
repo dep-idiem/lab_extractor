@@ -1,0 +1,6 @@
+ollama
+watchdog
+openpyxl
+streamlit
+pillow
+opencv-python
