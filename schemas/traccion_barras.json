@@ -1,0 +1,23 @@
+{
+  "ensayo": "traccion_barras_helicoidales",
+  "campos_header": {
+    "cliente": {"tipo": "string", "requerido": false},
+    "fecha_ensayo": {"tipo": "string", "requerido": false},
+    "temperatura_ambiente": {"tipo": "float", "requerido": false},
+    "nro_rec": {"tipo": "string", "requerido": false},
+    "escala_maquina_kN": {"tipo": "float", "requerido": false}
+  },
+  "tabla_probetas": {
+    "descripcion": "Tabla con resultados por probeta, puede tener filas vacías al final",
+    "columnas": [
+      {"nombre": "id_probeta", "tipo": "int"},
+      {"nombre": "calidad_barra", "tipo": "string"},
+      {"nombre": "carga_fluencia_kgf", "tipo": "float"},
+      {"nombre": "carga_max_kgf", "tipo": "float"},
+      {"nombre": "tension_fluencia_kgf_mm2", "tipo": "float", "puede_ser_null": true},
+      {"nombre": "tension_max_kgf_mm3", "tipo": "float", "puede_ser_null": true},
+      {"nombre": "alargamiento_pct", "tipo": "float", "puede_ser_null": true},
+      {"nombre": "tipo_rotura", "tipo": "string", "valores_validos": ["A","B","C","D","E"], "puede_ser_null": true}
+    ]
+  }
+}
