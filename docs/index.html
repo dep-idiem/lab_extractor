@@ -138,6 +138,54 @@
     max-height: 600px;
     border-radius: 4px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    cursor: zoom-in;
+    transition: transform 0.15s;
+  }
+  .image-wrap img:hover { transform: scale(1.01); }
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.88);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    cursor: zoom-out;
+    padding: 24px;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 4px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  }
+  .lightbox-close {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .lightbox-close:hover { background: rgba(255,255,255,0.2); }
+  .lightbox-hint {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: rgba(255,255,255,0.7);
+    font-size: 0.85rem;
   }
   .image-wrap .placeholder { color: var(--muted); font-size: 0.95rem; }
   .step {
@@ -318,6 +366,12 @@
   </section>
 </main>
 
+<div class="lightbox" id="lightbox" role="dialog" aria-label="Vista ampliada">
+  <button class="lightbox-close" id="lightboxClose" aria-label="Cerrar">×</button>
+  <img id="lightboxImg" src="" alt="formulario ampliado" />
+  <div class="lightbox-hint">Click fuera de la imagen o presiona Esc para cerrar</div>
+</div>
+
 <script>
   const CONFIDENCE_THRESHOLD = 0.80;
 
@@ -461,9 +515,28 @@
   }
 
   function showImage(src) {
-    document.getElementById("imageWrap").innerHTML = `<img src="${src}" alt="formulario" />`;
+    document.getElementById("imageWrap").innerHTML = `<img src="${src}" alt="formulario" id="formImg" />`;
+    document.getElementById("formImg").addEventListener("click", () => openLightbox(src));
     runPipeline();
   }
+
+  const lightbox = document.getElementById("lightbox");
+  const lightboxImg = document.getElementById("lightboxImg");
+  function openLightbox(src) {
+    lightboxImg.src = src;
+    lightbox.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+  function closeLightbox() {
+    lightbox.classList.remove("open");
+    document.body.style.overflow = "";
+  }
+  lightbox.addEventListener("click", e => {
+    if (e.target === lightbox || e.target.id === "lightboxClose") closeLightbox();
+  });
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && lightbox.classList.contains("open")) closeLightbox();
+  });
 
   const fileInput = document.getElementById("fileInput");
   fileInput.addEventListener("change", e => {
