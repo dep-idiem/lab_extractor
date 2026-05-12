@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>lab_extractor · demo</title>
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --card: #ffffff;
+    --border: #e5e7eb;
+    --text: #111827;
+    --muted: #6b7280;
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --success: #16a34a;
+    --warn: #ca8a04;
+    --danger: #dc2626;
+    --code-bg: #0f172a;
+    --code-text: #e2e8f0;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+      Ubuntu, Cantarell, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  header {
+    background: white;
+    border-bottom: 1px solid var(--border);
+    padding: 18px 28px;
+  }
+  header h1 { margin: 0 0 4px; font-size: 1.4rem; }
+  header p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+  main {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 24px;
+    padding: 24px 28px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  @media (max-width: 900px) {
+    main { grid-template-columns: 1fr; }
+  }
+  aside {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    height: fit-content;
+    position: sticky;
+    top: 24px;
+  }
+  aside h3 {
+    margin: 0 0 10px;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+  }
+  aside ol { padding-left: 18px; margin: 0; }
+  aside ol li { margin-bottom: 4px; font-size: 0.9rem; }
+  aside .footer {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+  .file-area {
+    border: 2px dashed var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    margin-bottom: 12px;
+  }
+  .file-area:hover { border-color: var(--primary); background: #f1f5ff; }
+  .file-area.dragover { border-color: var(--primary); background: #eff5ff; }
+  .file-area input { display: none; }
+  .btn {
+    display: inline-block;
+    background: var(--primary);
+    color: white;
+    border: 0;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 500;
+  }
+  .btn:hover { background: var(--primary-dark); }
+  .btn.ghost {
+    background: transparent;
+    color: var(--primary);
+    border: 1px solid var(--border);
+  }
+  .btn.ghost:hover { background: #f1f5ff; }
+  .content {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap: 20px;
+  }
+  @media (max-width: 1100px) {
+    .content { grid-template-columns: 1fr; }
+  }
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+  }
+  .panel h2 {
+    margin: 0 0 14px;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+  }
+  .image-wrap {
+    background: #f3f4f6;
+    border-radius: 8px;
+    padding: 8px;
+    text-align: center;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .image-wrap img {
+    max-width: 100%;
+    max-height: 600px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .image-wrap .placeholder { color: var(--muted); font-size: 0.95rem; }
+  .step {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+  .step-title {
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+  }
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .badge.high { background: var(--success); }
+  .badge.med { background: var(--warn); }
+  .badge.low { background: var(--danger); }
+  .reason { color: var(--muted); font-style: italic; margin-top: 8px; font-size: 0.9rem; }
+  code, pre {
+    font-family: ui-monospace, "SF Mono", Consolas, monospace;
+  }
+  .kbd {
+    background: #f3f4f6;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+  }
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .metric {
+    background: #f9fafb;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+  .metric .label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .metric .value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-top: 2px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    background: #f9fafb;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--muted);
+  }
+  tr:hover td { background: #fafbfc; }
+  td.null { color: var(--muted); font-style: italic; }
+  .alert {
+    margin-top: 14px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+  }
+  .alert.success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+  .alert.warn { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+  details {
+    margin-top: 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+  }
+  details summary {
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+  pre.json {
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 14px;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-size: 0.82rem;
+    margin: 12px 0 0;
+    line-height: 1.45;
+  }
+  .dudoso { margin: 6px 0; }
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid #e5e7eb;
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<header>
+  <h1>🧪 lab_extractor — demo</h1>
+  <p>
+    Sube una foto de un formulario de ensayo y observa cómo el pipeline lo
+    clasifica y extrae los datos estructurados.
+    <em>(Esta vista es un mockup con datos simulados.)</em>
+  </p>
+</header>
+
+<main>
+  <aside>
+    <h3>Entrada</h3>
+    <label class="file-area" id="dropzone">
+      <input type="file" id="fileInput" accept="image/*" />
+      <div><strong>Subir formulario</strong></div>
+      <div style="font-size: 0.82rem; color: var(--muted); margin-top: 4px;">
+        Arrastra o haz click (PNG/JPG)
+      </div>
+    </label>
+    <button class="btn ghost" id="useExampleBtn" style="width: 100%;">
+      Usar imagen de ejemplo
+    </button>
+
+    <h3 style="margin-top: 22px;">Pipeline</h3>
+    <ol>
+      <li><strong>Clasificador</strong> (qwen2.5vl) → tipo de ensayo</li>
+      <li><strong>Extractor</strong> (qwen2.5vl + schema) → JSON estructurado</li>
+      <li><strong>Validador</strong> → flag de revisión humana</li>
+      <li><strong>Exporter</strong> → Excel / DB</li>
+    </ol>
+
+    <div class="footer">
+      Threshold actual: <span class="kbd">80%</span>
+    </div>
+  </aside>
+
+  <section class="content">
+    <div class="panel">
+      <h2>Formulario recibido</h2>
+      <div class="image-wrap" id="imageWrap">
+        <div class="placeholder">
+          Sube una imagen o usa la de ejemplo para iniciar la demo.
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Resultado</h2>
+      <div id="result">
+        <div class="placeholder" style="color: var(--muted); padding: 40px 0; text-align: center;">
+          Esperando un formulario…
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+  const CONFIDENCE_THRESHOLD = 0.80;
+
+  const MOCK_CLASSIFICATION = {
+    tipo: "traccion_barras",
+    confidence: 0.96,
+    razon: "El título dice 'Registro para el ensayo de tracción a barras helicoidales'."
+  };
+
+  const MOCK_EXTRACTION = {
+    tipo: "traccion_barras",
+    header: {
+      cliente: "Minera Los Pelambres",
+      fecha_ensayo: "2026-04-22",
+      temperatura_ambiente: 19.5,
+      nro_rec: "REC-2814",
+      escala_maquina_kN: 600.0
+    },
+    probetas: [
+      { id_probeta: 1, calidad_barra: "A630-420H", carga_fluencia_kgf: 12450,
+        carga_max_kgf: 17820, tension_fluencia_kgf_mm2: 44.1,
+        tension_max_kgf_mm3: 63.2, alargamiento_pct: 14.8, tipo_rotura: "B" },
+      { id_probeta: 2, calidad_barra: "A630-420H", carga_fluencia_kgf: 12380,
+        carga_max_kgf: 17640, tension_fluencia_kgf_mm2: 43.9,
+        tension_max_kgf_mm3: 62.6, alargamiento_pct: 15.1, tipo_rotura: "B" },
+      { id_probeta: 3, calidad_barra: "A630-420H", carga_fluencia_kgf: 12510,
+        carga_max_kgf: 17905, tension_fluencia_kgf_mm2: 44.3,
+        tension_max_kgf_mm3: 63.5, alargamiento_pct: null, tipo_rotura: "A" },
+      { id_probeta: 4, calidad_barra: "A630-420H", carga_fluencia_kgf: 12290,
+        carga_max_kgf: 17580, tension_fluencia_kgf_mm2: 43.6,
+        tension_max_kgf_mm3: 62.4, alargamiento_pct: 14.5, tipo_rotura: "B" }
+    ],
+    confidence: 0.87,
+    campos_dudosos: ["alargamiento_pct fila 3 (ilegible)"]
+  };
+  MOCK_EXTRACTION.needs_review = MOCK_EXTRACTION.confidence < CONFIDENCE_THRESHOLD;
+
+  const HEADER_LABELS = {
+    cliente: "Cliente",
+    fecha_ensayo: "Fecha ensayo",
+    temperatura_ambiente: "Temp. ambiente (°C)",
+    nro_rec: "N° REC",
+    escala_maquina_kN: "Escala máquina (kN)"
+  };
+
+  const COLUMN_LABELS = {
+    id_probeta: "ID",
+    calidad_barra: "Calidad",
+    carga_fluencia_kgf: "Carga fluencia (kgf)",
+    carga_max_kgf: "Carga máx (kgf)",
+    tension_fluencia_kgf_mm2: "σ fluencia (kgf/mm²)",
+    tension_max_kgf_mm3: "σ máx (kgf/mm²)",
+    alargamiento_pct: "Alargamiento (%)",
+    tipo_rotura: "Tipo rotura"
+  };
+
+  function badge(value) {
+    let cls = "low", label = "baja";
+    if (value >= 0.9) { cls = "high"; label = "alta"; }
+    else if (value >= CONFIDENCE_THRESHOLD) { cls = "med"; label = "media"; }
+    return `<span class="badge ${cls}">${Math.round(value * 100)}% · ${label}</span>`;
+  }
+
+  function fmtCell(v) {
+    if (v === null || v === undefined) return '<td class="null">—</td>';
+    return `<td>${v}</td>`;
+  }
+
+  function renderResult(classification, extraction) {
+    const headerHTML = Object.entries(extraction.header)
+      .map(([k, v]) => `
+        <div class="metric">
+          <div class="label">${HEADER_LABELS[k] || k}</div>
+          <div class="value">${v === null ? '—' : v}</div>
+        </div>`).join("");
+
+    const cols = Object.keys(extraction.probetas[0]);
+    const thead = cols.map(c => `<th>${COLUMN_LABELS[c] || c}</th>`).join("");
+    const tbody = extraction.probetas.map(row =>
+      `<tr>${cols.map(c => fmtCell(row[c])).join("")}</tr>`
+    ).join("");
+
+    const dudosos = (extraction.campos_dudosos || []).length
+      ? `<div class="step" style="margin-top: 10px;">
+           <div class="step-title">Campos dudosos</div>
+           ${extraction.campos_dudosos.map(d => `<div class="dudoso">⚠️ ${d}</div>`).join("")}
+         </div>`
+      : "";
+
+    const alert = extraction.needs_review
+      ? `<div class="alert warn">⚠️ La confidence está por debajo del threshold
+         (${Math.round(CONFIDENCE_THRESHOLD * 100)}%) — este formulario va a revisión humana.</div>`
+      : `<div class="alert success">✅ Extracción aprobada automáticamente.</div>`;
+
+    return `
+      <div class="step">
+        <div class="step-title">Paso 1 · Clasificación</div>
+        <div>Tipo detectado: <code>${classification.tipo}</code> · ${badge(classification.confidence)}</div>
+        <div class="reason">${classification.razon}</div>
+      </div>
+
+      <div class="step">
+        <div class="step-title">
+          Paso 2 · Extracción
+          <span style="float: right;">Confidence global: ${badge(extraction.confidence)}</span>
+        </div>
+
+        <div style="font-weight: 600; font-size: 0.85rem; margin: 12px 0 6px; color: var(--muted);">ENCABEZADO</div>
+        <div class="metrics">${headerHTML}</div>
+
+        <div style="font-weight: 600; font-size: 0.85rem; margin: 6px 0; color: var(--muted);">PROBETAS</div>
+        <table>
+          <thead><tr>${thead}</tr></thead>
+          <tbody>${tbody}</tbody>
+        </table>
+      </div>
+
+      ${dudosos}
+      ${alert}
+
+      <details>
+        <summary>Ver JSON crudo (lo que recibe el exporter)</summary>
+        <pre class="json">${JSON.stringify(extraction, null, 2)}</pre>
+      </details>
+    `;
+  }
+
+  function runPipeline() {
+    const result = document.getElementById("result");
+    result.innerHTML = `<div style="padding: 20px 0; color: var(--muted);">
+      <span class="spinner"></span>Clasificando…
+    </div>`;
+    setTimeout(() => {
+      result.innerHTML = `<div style="padding: 20px 0; color: var(--muted);">
+        <span class="spinner"></span>Extrayendo datos del formulario…
+      </div>`;
+      setTimeout(() => {
+        result.innerHTML = renderResult(MOCK_CLASSIFICATION, MOCK_EXTRACTION);
+      }, 900);
+    }, 700);
+  }
+
+  function showImage(src) {
+    document.getElementById("imageWrap").innerHTML = `<img src="${src}" alt="formulario" />`;
+    runPipeline();
+  }
+
+  const fileInput = document.getElementById("fileInput");
+  fileInput.addEventListener("change", e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = ev => showImage(ev.target.result);
+    reader.readAsDataURL(f);
+  });
+
+  const dropzone = document.getElementById("dropzone");
+  ["dragenter", "dragover"].forEach(evt =>
+    dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.classList.add("dragover"); })
+  );
+  ["dragleave", "drop"].forEach(evt =>
+    dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.classList.remove("dragover"); })
+  );
+  dropzone.addEventListener("drop", e => {
+    const f = e.dataTransfer.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = ev => showImage(ev.target.result);
+    reader.readAsDataURL(f);
+  });
+
+  document.getElementById("useExampleBtn").addEventListener("click", () => {
+    showImage("image.png");
+  });
+</script>
+</body>
+</html>
